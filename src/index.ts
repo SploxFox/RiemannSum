@@ -1,0 +1,1 @@
+// You probably want to add 'DOM' to the types in the tsconfig or install Node types
