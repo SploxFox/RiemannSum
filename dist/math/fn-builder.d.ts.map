@@ -1,0 +1,1 @@
+{"version":3,"file":"fn-builder.d.ts","sourceRoot":"","sources":["../../src/math/fn-builder.ts"],"names":[],"mappings":"AACA;;GAEG;AACH,oBAAY,KAAK,GAAG,MAAM,MAAM,CAAC;AAMjC,eAAO,MAAM,KAAK;+BACI,MAAM;0BACX,KAAK,EAAE;yBACR,KAAK,EAAE;sBACV,KAAK,KAAK,KAAK;uBACd,KAAK,KAAK,KAAK;yBACb,KAAK,YAAY,KAAK;sBACzB,KAAK;uBACJ,KAAK;CACT,CAAC"}
