@@ -1,5 +1,9 @@
+*, *:focus, *:active {
+    outline: none;
+}
+
 body {
-    background-color: black;
+    background-color: rgb(7, 5, 14);
     color: white;
     overflow: hidden;
     padding: 0;
@@ -11,6 +15,7 @@ body {
     --lightAccent: rgb(255, 144, 101);
     --darkAccent: linear-gradient(130deg, rgba(107,0,87,1) 0%, rgba(65,0,108,1) 100%);
     --secondaryAccent: rgb(149, 192, 255);
+    --secondaryDark: rgb(0, 2, 15);
 }
 
 :root, .root, button {
@@ -121,7 +126,12 @@ button {
     color: var(--secondaryAccent);
     background: none;
     border: none;
+    /* border-bottom: 1px solid var(--secondaryAccent); */
+    font-weight: 900;
     font-size: inherit;
+    text-align: right;
+    width: 175px;
+    font-size: 1.5em;
 }
 
 .inputWrapper {
@@ -159,6 +169,10 @@ button {
     flex-direction: column;
 }
 
+.app > * {
+    margin: 10px
+}
+
 .buttonRow {
     display: flex;
     flex-direction: row-reverse;
@@ -166,4 +180,41 @@ button {
 
 .secondaryAccent {
     color: var(--secondaryAccent);
+}
+
+.slider {
+    height: 20px
+}
+
+.sliderThumb {
+    width: 20px;
+    height: 20px;
+    background: var(--darkAccent);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.sliderThumb:hover {
+    transform: scale(1.1);
+}
+
+.sliderTrack {
+    height: 1px;
+    background-color: var(--light);
+    margin: 9px 0;
+}
+
+.numberSlider {
+    display: flex;
+    flex-direction: column;
+}
+
+.right {
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+.eqOption {
+    background: var(--secondaryDark);
+    cursor: pointer;
 }

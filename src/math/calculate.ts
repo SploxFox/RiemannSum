@@ -1,10 +1,13 @@
 // @ts-ignore
 import { parse as parseLatex } from '@scicave/math-latex-parser';
+import { infty } from '..';
 import { valFn, ValFn } from './fn-builder';
+
+(window as any).parseLatex = parseLatex;
 
 export interface CalcArgs {
     latex: string,
-    sumType: 'left' | 'right' | 'trapezoid',
+    sumType: 'left' | 'right' | 'upper' | 'lower',
     rectNum: number
 }
 
@@ -32,6 +35,17 @@ interface Node {
     type: string
 }
 
+
+function getNum(ast: Node) {
+    if (ast.name == 'infty') {
+        return infty;
+    } else if (ast.type == 'number') {
+        return ast.value!;
+    } else {
+        throw err('Failed to read number ' + JSON.stringify(ast))
+    }
+}
+
 /**
  * The function that takes in a CalcArgs object and returns the computed Reimann sum.
  */
@@ -40,22 +54,19 @@ export function calculate({ latex, sumType, rectNum }: CalcArgs): number | CalcE
     const start = performance.now();
 
     // Create an abstract syntax tree (AST) from the latex using an external library
-    const ast = parseLatex(latex);
+    // Unfortunately, the parser that I'm using seems to throw an error on sin, cos and other
+    // functions and I didn't find it until it was too late :(
+    const ast = parseLatex(latex) as Node;
+    console.log(ast)
 
     if (ast.type != 'int') {
         // Not an integral.
-        return err('Not an integral');
+        throw err('Not an integral');
     }
 
-    
-
-    if (ast.args[0]?.type != 'number' || ast.args[1]?.type != 'number') {
-        return err('Integrals must be plain numbers (for now).')
-    }
-
-    const [ minNode, maxNode, root ] = ast.args;
-    const min = minNode.value;
-    const max = maxNode.value;
+    const [ minNode, maxNode, root ] = ast.args!;
+    const min = getNum(minNode);
+    const max = getNum(maxNode);
 
     let x: number;
     let dx: number;
@@ -72,13 +83,41 @@ export function calculate({ latex, sumType, rectNum }: CalcArgs): number | CalcE
     dx = (max - min) / rectNum;
     console.log({ dx });
 
+    // Main loop that computes each rectangle of the Riemann function. This code isn't very nice
+    // but I don't have the time to fix it.
     for (let i = 0; i < rectNum; i++) {
-        x = min + (dx * i);
+        if (sumType == 'left') {
+            x = min + (dx * i);
+        } else if (sumType == 'right') {
+            x = min + (dx * (i + 1));
+        } else if (sumType == 'lower' || sumType == 'upper') {
+            x = min + (dx * i);
+            let left = fn();
+
+            x = min + (dx * (i + 1));
+            let right = fn();
+
+            if (sumType == 'lower') {
+                if (left < right) {
+                    sum += clampInfty(left * dx);
+                } else {
+                    sum += clampInfty(right * dx);
+                }
+            } else {
+                if (left > right) {
+                    sum += clampInfty(left * dx);
+                } else {
+                    sum += clampInfty(right * dx);
+                }
+            }
+            continue;
+        }
+        
 
         //console.log({ x });
         //console.log(`Sum: ${sum}`);
 
-        sum += fn() * dx;
+        sum += clampInfty(fn() * dx);
     }
 
     const end = performance.now();
@@ -86,6 +125,18 @@ export function calculate({ latex, sumType, rectNum }: CalcArgs): number | CalcE
     console.log(`Computation took ${end - start} ms`);
 
     return sum;
+}
+
+function clampInfty(num: number) {
+    if (Math.abs(num) == Infinity) {
+        if (num < 0) {
+            return -infty
+        } else {
+            return infty
+        }
+    } else {
+        return num;
+    }
 }
 
 function getParsers(getVal: ValFn) {

@@ -1,6 +1,6 @@
 export interface CalcArgs {
     latex: string;
-    sumType: 'left' | 'right' | 'trapezoid';
+    sumType: 'left' | 'right' | 'upper' | 'lower';
     rectNum: number;
 }
 /**

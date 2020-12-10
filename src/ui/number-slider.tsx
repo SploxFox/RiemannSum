@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactSlider from 'react-slider';
+import { Right } from './right';
 import { TextInput } from './text-input';
 
 interface Props {
@@ -11,14 +12,29 @@ interface Props {
 }
 
 export function NumberSlider(props: Props) {
-    return <div>
+    return <div className='numberSlider'>
+        <Right>
+            <TextInput pattern='[0-9]*' value={props.value} onChange={e => {
+                const num = Number((e.target as any).value);
+                if (!isNaN(num)) {
+                    props.onChange(num);
+                } else {
+                    throw 'Number was NaN!'
+                }
+            }}></TextInput>
+            <span style={{ flexGrow: 1 }}></span>
+            <span>{props.label}</span>
+        </Right>
         
-        <TextInput pattern='[0-9]*' value={props.value} onChange={e => {
-            const num = Number((e.target as any).textContent);
-            if (!isNaN(num)) {
-                props.onChange(num);
-            }
-        }}></TextInput>
-        <ReactSlider step={0.01} value={(props.toSlider ?? (v => v))(props.value)} onChange={(val) => (props.fromSlider ?? (v => v))(val as number)}></ReactSlider>
+        <ReactSlider
+            step={0.01}
+            min={0}
+            max={15}
+            value={(props.toSlider ?? (v => v))(props.value)}
+            onChange={(val) => props.onChange((props.fromSlider ?? (v => v))(val as number))}
+            thumbClassName='sliderThumb'
+            trackClassName='sliderTrack'
+            renderThumb={(props) => <div {...props}></div>}
+        />
     </div>
 }
