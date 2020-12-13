@@ -71,9 +71,7 @@ export function calculate({ latex, sumType, rectNum }: CalcArgs): number | CalcE
     let x: number;
     let dx: number;
 
-    const getVal = () => x;
-
-    const { parseNode, parseOperator } = getParsers(getVal);
+    const { parseNode } = getParsers();
 
     const fn = parseNode(root);
 
@@ -92,10 +90,10 @@ export function calculate({ latex, sumType, rectNum }: CalcArgs): number | CalcE
             x = min + (dx * (i + 1));
         } else if (sumType == 'lower' || sumType == 'upper') {
             x = min + (dx * i);
-            let left = fn();
+            let left = fn(x);
 
             x = min + (dx * (i + 1));
-            let right = fn();
+            let right = fn(x);
 
             if (sumType == 'lower') {
                 if (left < right) {
@@ -111,13 +109,11 @@ export function calculate({ latex, sumType, rectNum }: CalcArgs): number | CalcE
                 }
             }
             continue;
+        } else {
+            throw 'err';
         }
-        
 
-        //console.log({ x });
-        //console.log(`Sum: ${sum}`);
-
-        sum += clampInfty(fn() * dx);
+        sum += normalize(fn(x) * dx);
     }
 
     const end = performance.now();
@@ -125,6 +121,16 @@ export function calculate({ latex, sumType, rectNum }: CalcArgs): number | CalcE
     console.log(`Computation took ${end - start} ms`);
 
     return sum;
+}
+
+function normalize(num: number) {
+    num = clampInfty(num);
+
+    if (isNaN(num)) {
+        num = 0;
+    }
+
+    return num;
 }
 
 function clampInfty(num: number) {
@@ -139,12 +145,12 @@ function clampInfty(num: number) {
     }
 }
 
-function getParsers(getVal: ValFn) {
+function getParsers() {
     function parseNode(node: Node): ValFn {
         switch (node.type) {
             case 'number': return valFn.const(node.value!);
             case 'operator': return parseOperator(node);
-            case 'id': return getVal;
+            case 'id': return (x: number) => x;
             case 'sqrt': return valFn.sqrt(parseNode(node.args![0]));
             case 'frac': return valFn.div(parseNode(node.args![0]), parseNode(node.args![1]));
             default: throw `Uknown node type ${node.type}`

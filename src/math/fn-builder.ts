@@ -2,19 +2,19 @@
 /**
  * A function that provides a value.
  */
-export type ValFn = () => number;
+export type ValFn = (x: number) => number;
 
 function wrap(f: ValFn, numFn: (num: number) => number): ValFn {
-    return () => numFn(f());
+    return (x: number) => numFn(f(x));
 }
 
 export const valFn = {
-    const: (constant: number) => () => constant,
-    mult: (vals: ValFn[]) => () => vals.map(fn => fn()).reduce((prev, curr) => prev * curr, 1),
-    add: (vals: ValFn[]) => () => vals.map(fn => fn()).reduce((prev, curr) => prev + curr, 0),
-    div: (f: ValFn, g: ValFn) => () => f() / g(),
-    subt: (f: ValFn, g: ValFn) => () => f() - g(),
-    pow: (base: ValFn, exponent: ValFn) => () => Math.pow(base(), exponent()),
+    const: (constant: number) => (x: number) => constant,
+    mult: (vals: ValFn[]) => (x: number) => vals.map(fn => fn(x)).reduce((prev, curr) => prev * curr, 1),
+    add: (vals: ValFn[]) => (x: number) => vals.map(fn => fn(x)).reduce((prev, curr) => prev + curr, 0),
+    div: (f: ValFn, g: ValFn) => (x: number) => f(x) / g(x),
+    subt: (f: ValFn, g: ValFn) => (x: number) => f(x) - g(x),
+    pow: (base: ValFn, exponent: ValFn) => (x: number) => Math.pow(base(x), exponent(x)),
     abs: (f: ValFn) => wrap(f, Math.abs),
     sqrt: (f: ValFn) => wrap(f, Math.sqrt)
 } as const;
